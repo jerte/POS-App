@@ -1,5 +1,6 @@
 import tkinter as tk
 from orders import Item
+from functools import partial
 
 class CalculatorControls(tk.Frame):
     def __init__(self,*args,**kwargs):
@@ -22,10 +23,11 @@ class CalculatorControls(tk.Frame):
     
     def add_func(self):
         try:
-            self.order.items.append(self.display_label['text'])
+            item = Item()
+            self.order.items.append(item)
             self.create_order_display()
         except Exception:
-            print('error logged')
+            print('add error logged')
     
     def clear_func(self):
         try:
@@ -50,13 +52,13 @@ class Calculator(tk.Frame):
                 b += 1
                 tk.Button(self, 
                           text=str(b),
-                          command=self.add_num_to_display(b),
+                          command=partial(self.add_num_to_display,b),
                           height=5,
                           width=10).grid(row=i,column=j, padx=5,pady=5)
                 #self.num_button_func(b))
 
     
-    def add_num_to_display_helper(self,num):
+    def add_num_to_display(self,num):
         temp = self.display["text"]
         #while zero, get last zero, replace with new value or shifted value
         i = 0
@@ -74,10 +76,6 @@ class Calculator(tk.Frame):
                 self.display["text"] = temp[-2] + "." + temp[-1] + str(num)
         elif(len(temp)<10):
             self.display["text"] = temp[:-3] + temp[-2] + "." + temp[-1] + str(num)
-
-    def add_num_to_display(self, i):
-        return lambda:self.add_num_to_display_helper(i)
-
 
     def num_button_func(self, i):
         return lambda:self.display_var.set(str(self.display_var)[:-2] + str(self.display_var)[-2]+ "." + str(self.display_var)[-1] + str(i))

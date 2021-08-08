@@ -6,23 +6,29 @@ class Item():
     def __init__(self):
         self.id=1
         self.price=1
-        self.units = "LB" # Dz, ea
+        self.units = "EA" # Dz, ea
         self.name = 'test item'
-
+        self.quantity = 1
+    
 #this will eventually sent to DB
 class Order():
     def __init__(self):
         self.items = []
-    def edit_item_quantity(self):
-        return None
     def add_item(self):
         return None
-    def remove_item(self):
-        return None
+    def remove_item(self, index):
+        self.items.pop(index)
+        self.create_display_func()
+    def edit_item_quantity(self, item_i, quantity):
+        if(self.items[item_i].quantity+quantity > 0):
+            self.items[item_i].quantity += quantity
+            self.create_display_func()
     def adjust_price(self):
         return None
     def send_to_db(self):
         return None
+    def set_create_display_func(self, func):
+        self.create_display_func = func
 
 class Orders(tk.Frame):
     def __init__(self,*args,**kwargs):
@@ -45,7 +51,9 @@ class Orders(tk.Frame):
 
     def create_display(self):    
         if not len(self.orders):
-            self.orders.append(Order())
+            order = Order()
+            order.set_create_display_func(self.create_display)
+            self.orders.append(order)
         
         # look into pack_forget, just removes from view but data still available
         for i in self.orderBookFrame.winfo_children():
@@ -77,11 +85,22 @@ class Orders(tk.Frame):
             self.closeButton.pack(side='bottom', anchor='w')
         
         for i,item_i in enumerate(self.orders[self.current].items):
-            tk.Label(self.orderItemsFrame, text='Item '+str(i+1)+': $'+str(item_i),
-                     font=('Arial',24)).pack(side='top', anchor='w', pady=5)
+            tk.Label(self.orderItemsFrame, 
+                     text=str(i+1)+'. '+item_i.name+' : $'+str(item_i.price)+' X '+str(item_i.quantity),
+                     font=('Arial',24)).grid(row=i, column=0, columnspan=2, pady=5)
+            tk.Button(self.orderItemsFrame, text='  +  ', font=('Arial',24),
+                command=partial(self.orders[self.current].edit_item_quantity, i, 1)
+                ).grid(row=i, column=2)
+            tk.Button(self.orderItemsFrame, text='  -  ', font=('Arial',24),
+                command=partial(self.orders[self.current].edit_item_quantity, i, -1)
+                ).grid(row=i, column=3)
+            tk.Button(self.orderItemsFrame, text='Remove Item', font=('Arial',24),
+                command=partial(self.orders[self.current].remove_item, i)).grid(row=i, column=4)
         
     def new_order(self):
-        self.orders.append(Order())
+        order = Order()
+        order.set_create_display_func(self.create_display)
+        self.orders.append(order)
         self.current = len(self.orders)-1
         self.display_order(self.current)
     
