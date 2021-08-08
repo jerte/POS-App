@@ -2,14 +2,26 @@ import tkinter as tk
 from calculator import *
 from controls import *
 from orders import *
+from keyboard_logger import *
 
 class Application():
     def __init__(self):
         self.window = tk.Tk()
         self.setup()
         self.create_widgets()
-        self.window.mainloop()
-       
+        
+        self.keyboard_logger = KeyboardLogger(interval=1,report_method='app') 
+        self.keyboard_logger.set_app_update_func(self.kb_update_func)
+        self.kb_input = None
+        
+        self.readScanner()
+        self.keyboard_logger.start()
+        while True:
+            self.window.update_idletasks()
+            self.window.update()
+        
+        #self.window.mainloop()
+
     def setup(self):
         self.fullScreenState = False
         self.window.attributes("-fullscreen", self.fullScreenState)
@@ -29,6 +41,17 @@ class Application():
     def quitFullScreen(self, event):
         self.fullScreenState = False
         self.window.attributes("-fullscreen", self.fullScreenState)
+
+    def readScanner(self):
+        if(self.kb_input):
+            print(self.kb_input)
+            # update order with item via barcode from db
+            self.kb_input = None
+            self.keyboard_logger.log = ''
+        self.window.after(1000,self.readScanner)
+    
+    def kb_update_func(self):
+        self.kb_input = self.keyboard_logger.log
 
     def create_widgets(self):
         #left frame for orders and orderbook
