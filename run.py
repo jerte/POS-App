@@ -3,6 +3,7 @@ from calculator import *
 from controls import *
 from orders import *
 from keyboard_logger import *
+from db import *
 
 class Application():
     def __init__(self):
@@ -14,8 +15,11 @@ class Application():
         self.keyboard_logger.set_app_update_func(self.kb_update_func)
         self.kb_input = None
         
+        self.db_c = DB_Connector()
+
         self.readScanner()
         self.keyboard_logger.start()
+        
         while True:
             self.window.update_idletasks()
             self.window.update()
@@ -45,6 +49,8 @@ class Application():
     def readScanner(self):
         if(self.kb_input):
             print(self.kb_input)
+            print(self.kb_input[:-8])
+            print(self.db_c.get_item_by_barcode(self.kb_input[:-8]))
             # update order with item via barcode from db
             self.kb_input = None
             self.keyboard_logger.log = ''
@@ -69,7 +75,7 @@ class Application():
         self.controlFrame.pack(side="bottom")
 
         self.controls = Controls(self.controlFrame)
-        self.controls.update_quit(self.window)
+        self.controls.update_window(self.window)
         self.controls.pack(side="bottom")
         
         self.calcFrame = tk.Frame(self.rightFrame)

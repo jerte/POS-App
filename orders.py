@@ -3,12 +3,15 @@ from functools import partial
 
 #DB too
 class Item():
-    def __init__(self):
-        self.id=1
-        self.price=1
-        self.units = "EA" # Dz, ea
-        self.name = 'test item'
-        self.quantity = 1
+    def __init__(self, item_id,stocked_quantity, cost, price, barcode, units, name, tax_rate):
+        self.item_id=item_id
+        self.stocked_quantity = stocked_quantity
+        self.cost = cost
+        self.price=price
+        self.barcode = barcode
+        self.units = units
+        self.name = name
+        self.tax_rate = tax_rate
     
 #this will eventually sent to DB
 class Order():
