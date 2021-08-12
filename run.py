@@ -3,8 +3,10 @@ from calculator import *
 from controls import *
 from orders import *
 from keyboard_logger import *
-from db import *
 
+''' Application class
+        collects & interconnects widgets to run app
+'''
 class Application():
     def __init__(self):
         self.window = tk.Tk()
@@ -48,23 +50,31 @@ class Application():
 
     def readScanner(self):
         if(self.kb_input):
-            print(self.kb_input)
-            print(self.kb_input[:-8])
-            print(self.db_c.get_item_by_barcode(self.kb_input[:-8]))
+            # [:-8] because '[ENTER]' @ end of barcode
+            item_tup = self.db_c.get_item_by_barcode(self.kb_input[:-8])
+            if( item_tup ):
+                new_item = Item(item_tup[0], item_tup[1], item_tup[2], item_tup[3], 
+                                item_tup[4], item_tup[5], item_tup[6], item_tup[7])
+                
+                self.order_book.add_item_to_current_order(new_item)
+            else:
+                print('item not found')
+            
             # update order with item via barcode from db
             self.kb_input = None
             self.keyboard_logger.log = ''
-        self.window.after(1000,self.readScanner)
+        self.window.after(500,self.readScanner)
     
     def kb_update_func(self):
         self.kb_input = self.keyboard_logger.log
-
+    
+    # definitely need to split this into mulitple methods
     def create_widgets(self):
         #left frame for orders and orderbook
         self.leftFrame = tk.Frame(self.window)
         self.leftFrame.pack(fill="both", side="left", expand=1)
         
-        self.order_book = Orders(self.leftFrame)
+        self.order_book = Orderbook(self.leftFrame)
         self.order_book.pack(fill="both", side='left', expand=1)
         
         #right frame for calculator, app controls, item selection

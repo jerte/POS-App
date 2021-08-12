@@ -24,7 +24,7 @@ class DB_Connector:
         item = self.cur.fetchone()
         if( item ):
             return (int(item[0]), float(item[1]), float(item[2]), float(item[3]),
-                    str(item[4]), str(item[5]), str(item[6]), float(item[4]))
+                    str(item[4]), str(item[5]), str(item[6]), float(item[7]))
         else:
             return None
     

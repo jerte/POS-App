@@ -23,6 +23,7 @@ class CalculatorControls(tk.Frame):
     
     def add_func(self):
         try:
+            #depreciated lol
             item = Item()
             self.order.items.append(item)
             self.create_order_display()

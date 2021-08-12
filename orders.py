@@ -1,9 +1,13 @@
 import tkinter as tk
 from functools import partial
+from db import *
 
 #DB too
+''' item class
+        represents item from db
+'''
 class Item():
-    def __init__(self, item_id,stocked_quantity, cost, price, barcode, units, name, tax_rate):
+    def __init__(self, item_id,stocked_quantity, cost, price, barcode, units, name, tax_rate, quantity=1):
         self.item_id=item_id
         self.stocked_quantity = stocked_quantity
         self.cost = cost
@@ -12,34 +16,41 @@ class Item():
         self.units = units
         self.name = name
         self.tax_rate = tax_rate
-    
-#this will eventually sent to DB
+        self.quantity = quantity
+        
+''' order class
+        represents order from db
+'''
 class Order():
     def __init__(self):
         self.items = []
-    def add_item(self):
-        return None
+
     def remove_item(self, index):
         self.items.pop(index)
         self.create_display_func()
+    
     def edit_item_quantity(self, item_i, quantity):
         if(self.items[item_i].quantity+quantity > 0):
             self.items[item_i].quantity += quantity
             self.create_display_func()
+    
     def adjust_price(self):
         return None
-    def send_to_db(self):
-        return None
+    
     def set_create_display_func(self, func):
         self.create_display_func = func
 
-class Orders(tk.Frame):
+''' orderbook class
+        tk frame widget which displays & manages orders
+'''
+class Orderbook(tk.Frame):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)    
         self.setup()
         self.create_display()
         self.add_location = self.orders[self.current]
-    
+        self.db_c = DB_Connector()
+
     def setup(self):
         self.current=0
         self.orders = []
@@ -87,19 +98,22 @@ class Orders(tk.Frame):
                                             command=self.close_order)
             self.closeButton.pack(side='bottom', anchor='w')
         
-        for i,item_i in enumerate(self.orders[self.current].items):
+        for i,item_i in enumerate(self.get_current_order().items):
             tk.Label(self.orderItemsFrame, 
                      text=str(i+1)+'. '+item_i.name+' : $'+str(item_i.price)+' X '+str(item_i.quantity),
                      font=('Arial',24)).grid(row=i, column=0, columnspan=2, pady=5)
             tk.Button(self.orderItemsFrame, text='  +  ', font=('Arial',24),
-                command=partial(self.orders[self.current].edit_item_quantity, i, 1)
+                command=partial(self.get_current_order().edit_item_quantity, i, 1)
                 ).grid(row=i, column=2)
             tk.Button(self.orderItemsFrame, text='  -  ', font=('Arial',24),
-                command=partial(self.orders[self.current].edit_item_quantity, i, -1)
+                command=partial(self.get_current_order().edit_item_quantity, i, -1)
                 ).grid(row=i, column=3)
             tk.Button(self.orderItemsFrame, text='Remove Item', font=('Arial',24),
-                command=partial(self.orders[self.current].remove_item, i)).grid(row=i, column=4)
-        
+                command=partial(self.get_current_order().remove_item, i)).grid(row=i, column=4)
+    
+    def get_current_order(self):
+        return self.orders[self.current]
+    
     def new_order(self):
         order = Order()
         order.set_create_display_func(self.create_display)
@@ -107,18 +121,32 @@ class Orders(tk.Frame):
         self.current = len(self.orders)-1
         self.display_order(self.current)
     
-    def close_order(self):
-        #keep data
+    def close_order(self, paid=True):
+        #if(paid):
+        #    keep data
+        #     send order to db
         self.orders.pop(self.current)
         self.current = 0
         self.create_display()
-        # send order to db
     
     def display_order(self, index=0):
         self.current = index 
-        self.add_location = self.orders[self.current]
+        self.add_location = self.get_current_order()
         self.add_location_update_func(self.add_location)
         self.create_display()
 
     def set_add_location_update_func(self, add_location_update_func):
         self.add_location_update_func = add_location_update_func
+    
+    def add_item_to_current_order(self, item):
+        barcodes = [i.barcode for i in self.get_current_order().items]
+        if( item.barcode in barcodes ):
+            # way too long
+            self.get_current_order().items[barcodes.index(item.barcode)].quantity += 1     
+        else:
+            self.get_current_order().items.append(item)
+        self.create_display()
+
+    def send_to_db(self, order_id):
+        return None
+    
