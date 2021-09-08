@@ -1,45 +1,50 @@
+''' 
+to do
+1) clean up code
+    - delete unnecessary comments & functions
+    - rewrite into cleaner & clearer code
+    - standardize conventions, review python style guide & rewrite
+    - review imports for all files
+    - fix redundancies (kb input i'm looking at you)
+2) change from pack to grid -> better for adding & removing widgets
+3) add item selection app
+    - sort items so that most sold appear first
+    - maybe alphabetical option too
+4) fine tune app appearance
+'''
 import tkinter as tk
 from calculator import *
 from controls import *
 from orders import *
 from keyboard_logger import *
+from item_selector import *
 
 ''' Application class
         collects & interconnects widgets to run app
 '''
 class Application():
     def __init__(self):
-        self.window = tk.Tk()
         self.setup()
         self.create_widgets()
+        self.readScanner()
+        self.window.mainloop()
+
+    ''' declare variables and create window '''
+    def setup(self): 
+        self.window = tk.Tk() 
+        self.db_c = DB_Connector()
         
         self.keyboard_logger = KeyboardLogger(interval=1,report_method='app') 
-        self.keyboard_logger.set_app_update_func(self.kb_update_func)
-        self.kb_input = None
-        
-        self.db_c = DB_Connector()
-
-        self.readScanner()
         self.keyboard_logger.start()
         
-        while True:
-            self.window.update_idletasks()
-            self.window.update()
-        
-        #self.window.mainloop()
-
-    def setup(self):
         self.fullScreenState = False
         self.window.attributes("-fullscreen", self.fullScreenState)
-
         self.w, self.h = self.window.winfo_screenwidth(), self.window.winfo_screenheight()
         self.window.geometry("%dx%d" %(self.w, self.h))
         self.window.configure(bg='white')
-
         self.window.bind("<F11>", self.toggleFullScreen)
         self.window.bind("<Escape>",self.quitFullScreen)
         
-
     def toggleFullScreen(self, event):
         self.fullScreenState = not self.fullScreenState
         self.window.attributes("-fullscreen",self.fullScreenState)
@@ -48,68 +53,40 @@ class Application():
         self.fullScreenState = False
         self.window.attributes("-fullscreen", self.fullScreenState)
 
+    ''' method to read keyboard input for barcodes every .5 seconds 
+        (.5s is not set in stone. may change)
+    '''
     def readScanner(self):
-        if(self.kb_input):
+        if(self.keyboard_logger.log):
             # [:-8] because '[ENTER]' @ end of barcode
-            item_tup = self.db_c.get_item_by_barcode(self.kb_input[:-8])
+            item_tup = self.db_c.get_item_by_barcode(self.keyboard_logger.log[:-8])
             if( item_tup ):
-                new_item = Item(item_tup[0], item_tup[1], item_tup[2], item_tup[3], 
-                                item_tup[4], item_tup[5], item_tup[6], item_tup[7])
-                
+                new_item = Item(*item_tup)
                 self.order_book.add_item_to_current_order(new_item)
             else:
+                # handling this will come later
                 print('item not found')
+                #print('do you want to add this item now?')
             
-            # update order with item via barcode from db
-            self.kb_input = None
             self.keyboard_logger.log = ''
+
+        # call readScanner again after .5 seconds
         self.window.after(500,self.readScanner)
     
-    def kb_update_func(self):
-        self.kb_input = self.keyboard_logger.log
-    
-    # definitely need to split this into mulitple methods
     def create_widgets(self):
-        #left frame for orders and orderbook
-        self.leftFrame = tk.Frame(self.window)
-        self.leftFrame.pack(fill="both", side="left", expand=1)
-        
-        self.order_book = Orderbook(self.leftFrame)
+        self.order_book = Orderbook(self.window)
         self.order_book.pack(fill="both", side='left', expand=1)
-        
-        #right frame for calculator, app controls, item selection
-        self.rightFrame = tk.Frame(self.window)
-        self.rightFrame.pack(side="right", fill="both")
-
-        self.controlFrame = tk.Frame(self.rightFrame)
-        self.controlFrame.pack(side="bottom")
-
-        self.controls = Controls(self.controlFrame)
-        self.controls.update_window(self.window)
-        self.controls.pack(side="bottom")
-        
-        self.calcFrame = tk.Frame(self.rightFrame)
-        self.calcFrame.pack(side='bottom')
-        
-        self.calc = Calculator(self.calcFrame, highlightcolor='black')
-        self.calc.pack(side='top')
-        
-        self.calcControls = CalculatorControls(self.calcFrame)
-        self.calcControls.set_display_label(self.calc.display)
-        self.calcControls.set_add_location(self.order_book.add_location)
-        self.calcControls.set_create_order_display(self.order_book.create_display)
-        self.calcControls.pack(side='bottom')
+       
+        # app controls
+        # calculator
+        # item selection
+        self.controlFrame = Controls(self.window)
+        self.controlFrame.pack(fill='both', side='right')
            
-        self.order_book.set_add_location_update_func(self.calcControls.set_add_location)
+        self.controlFrame.calc_controls.link_get_current_order(self.order_book.get_current_order)
+        self.controlFrame.calc_controls.link_order_create_display(self.order_book.create_display)
 
+        self.order_book.link_to_calc_display(self.controlFrame.calc.display)
 
 if __name__=='__main__':
     app = Application()
-'''
-app['background'] = "#FFFFFF"
-#app.geometry(str(app.winfo_screenwidth())+"x"+str(app.winfo_screenheight()))
-
-self.geometry("1920x1080")
-print(app.winfo_height()) 
-app.mainloop()
-'''

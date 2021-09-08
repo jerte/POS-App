@@ -8,6 +8,7 @@ class DB_Connector:
     def __init__(self):
         self.conn = psycopg2.connect(str(os.environ['CONN']))
         self.cur = self.conn.cursor()
+    
     ''' items '''
     ''' getters '''
     def get_all_items(self):
@@ -28,24 +29,18 @@ class DB_Connector:
         else:
             return None
     
+    ''' unimplemented 
     def get_item_stock(self, item_id):
-        return self.get_item()
     def get_item_cost(self, item_id):
-        return self.get_item()
     def get_item_price(self, item_id):
-        return self.get_item()
     def get_item_barcode(self, item_id):
-        return self.get_item()
     def get_item_units(self, item_id):
-        return None
     def get_item_name(self, item_id):
-        return None
     def get_item_tax(self, item_id):
-        return None
     def get_items_where_name_like(self, partial_name:str):
-        return None
-
+        end inimplemented '''
     ''' end getters '''
+
     ''' insert '''
     def add_item(self, stocked_quantity:float, cost:float, price:float, 
                     barcode:str, units:str, name:str, tax:float):
@@ -71,9 +66,10 @@ class DB_Connector:
     
     def get_order_items(self, order_id):
         return 
+    ''' end orders '''
+
     def get_price_history(self, item_id):
         return None
-    ''' end orders '''
 
 class DB_App:
     
@@ -82,7 +78,7 @@ class DB_App:
         if window:
             self.window = window
             for i in self.window.pack_slaves():
-                i.destroy()
+                i.forget()
         else:    
             self.window = tk.Tk()
 
@@ -102,7 +98,6 @@ class DB_App:
         self.window.bind("<F11>", self.toggleFullScreen)
         self.window.bind("<Escape>",self.quitFullScreen)
         
-
     def toggleFullScreen(self, event):
         self.fullScreenState = not self.fullScreenState
         self.window.attributes("-fullscreen",self.fullScreenState)
@@ -144,7 +139,7 @@ class DB_App:
         '''
         self.add_button.grid(row=9, column=1)
         self.quit_button = tk.Button(self.data_entry_frame, text='quit', fg='RED',
-                            command=self.window.destroy)
+                            command=self.master.destroy)
         self.quit_button.grid(row=9,column=2)
 
         self.data_entry_frame.pack(expand=1)
@@ -159,24 +154,32 @@ class DB_App:
     def print_entries(self):
         for k,v in self.entries.items():
             print(k, v.get())
+
+    def quit(self):
+        '''
+        if opened as main app 
+            self.master.destroy
+        elif opened as sub app
+            destroy all active pack/grid elements
+            repack/regrid forgotten elements
+        '''
+        return None
     ''' 
         reports, maybe add construct & view methods
         item quantity sold, type of item sold, profit by item,
         total profit, total tax, total profit by payment method, 
         total tax by payment method
-    '''
+    
+    unimplemented
        
     def daily_report(self):
-        return None
     def weekly_report(self):
-        return None
     def monthly_report(self):
-        return None
     def quarterly_report(self):
-        return None
     def annual_report(self):
-        return None
-    ''' end reports '''
+    
+    end unimplemented '''
+    '''end reports '''
 
 if __name__=='__main__':
     #dba = DB_App()

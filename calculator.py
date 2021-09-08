@@ -8,37 +8,38 @@ class CalculatorControls(tk.Frame):
         self.create_buttons()
 
     def create_buttons(self):
-        #add, clear, tax buttons
+        #add, clear, tax (necessary?) buttons
         self.add = tk.Button(self, text='add', command=self.add_func)
         self.clear = tk.Button(self, text='clear', command=self.clear_func)
-        self.pack()
         self.add.pack(side="left")
         self.clear.pack(side="right")
     
     def set_display_label(self, label):
         self.display_label = label
 
-    def set_add_location(self, order):
-        self.order = order
-    
     def add_func(self):
         try:
             #depreciated lol
             item = Item()
+            
+            #should be self.get_current_order().append(item)
             self.order.items.append(item)
-            self.create_order_display()
+            
+            self.order_create_display()
         except Exception:
-            print('add error logged')
+            print('error logged - add func')
     
     def clear_func(self):
         try:
             self.display_label['text'] = '0.00'
         except Exception as e:
-            print('error logged')
-    
-    def set_create_order_display(self, create_order_display):
-        self.create_order_display = create_order_display
+            print('error logged - clear func')
+   
+    def link_get_current_order(self, get_current_order):
+        self.get_current_order = get_current_order
 
+    def link_order_create_display(self, create_display):
+        self.order_create_display = create_display
 
 class Calculator(tk.Frame):
     def __init__(self,*args,**kwargs):
@@ -56,8 +57,6 @@ class Calculator(tk.Frame):
                           command=partial(self.add_num_to_display,b),
                           height=5,
                           width=10).grid(row=i,column=j, padx=5,pady=5)
-                #self.num_button_func(b))
-
     
     def add_num_to_display(self,num):
         temp = self.display["text"]
@@ -78,9 +77,6 @@ class Calculator(tk.Frame):
         elif(len(temp)<10):
             self.display["text"] = temp[:-3] + temp[-2] + "." + temp[-1] + str(num)
 
-    def num_button_func(self, i):
-        return lambda:self.display_var.set(str(self.display_var)[:-2] + str(self.display_var)[-2]+ "." + str(self.display_var)[-1] + str(i))
-       
     def create_display(self):
         self.display = tk.Label(self, text="0.00", bg='white', font=("Arial",24))
         self.display.grid(row=0, columnspan=3)
