@@ -3,10 +3,10 @@ import db
 from calculator import *
 
 class Controls(tk.Frame):
-    def __init__(self,master=None):
+    def __init__(self,master, window):
         super().__init__(master)
         self.master = master
-        
+       	self.window = window 
         # app controls
         self.create_app_controls()
         
@@ -28,7 +28,7 @@ class Controls(tk.Frame):
         self.db_app = tk.Button(self.app_controls_inner_frame, text="DB APP",
                                     command=self.launch_db_app)
         self.quit = tk.Button(self.app_controls_inner_frame, text="QUIT", fg="red",
-                                    command=self.master.destroy)
+                                    command=self.window.destroy)
         
         self.timesheet.grid(row=0, column=1)    
         self.schedule.grid(row=0, column=2)    
@@ -55,7 +55,7 @@ class Controls(tk.Frame):
     ''' partially implemented '''
     def launch_db_app(self):
         ''' not meant to be launched from here atm, better to run db.py directly'''
-        db_app = db.DB_App(self.master)
+        db_app = db.DB_App(self.window)
     ''' end partially implemented '''
      
     ''' unimplemented '''

@@ -13,4 +13,9 @@ class Item_Selector(tk.Frame):
     def set_dbc(self, dbc):
         self.dbc = dbc
 
-
+class Item_Selector_App():
+	def __init__(self):
+		print('run app')
+	
+if __name__=='__main__':
+	app = Item_Selector_App()

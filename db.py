@@ -75,14 +75,17 @@ class DB_App:
     
     def __init__(self, window=None):
         self.db_c = DB_Connector()
+        self.is_sub_app = bool(window)
         if window:
             self.window = window
             for i in self.window.pack_slaves():
                 i.forget()
         else:    
             self.window = tk.Tk()
-
-        self.setup()
+            self.setup()
+        
+        self.app_frame = tk.Frame(self.window)
+        self.app_frame.pack(fill="both",expand=1)
         self.create_widgets()
         # will this break main app? also how 2 fix
         self.window.mainloop()
@@ -115,10 +118,11 @@ class DB_App:
         self.entries[name] = text_box
 
     def create_widgets(self):
-        self.header = tk.Label(self.window,text='DB APP!', font=('Arial',36))
-        self.header.pack()
+        self.header = tk.Label(self.app_frame,text='DB APP', font=('Arial',36))
         
-        self.data_entry_frame = tk.Frame(self.window)
+        self.data_entry_frame_outer = tk.Frame(self.app_frame)
+        self.data_entry_frame = tk.Frame(self.data_entry_frame_outer)
+
         self.entries = {'name':None, 'stocked quantity':None, 'cost':None, 'price':None,
                  'barcode':None, 'units':None, 'tax rate':None}
         r = c = 1
@@ -139,12 +143,16 @@ class DB_App:
         '''
         self.add_button.grid(row=9, column=1)
         self.quit_button = tk.Button(self.data_entry_frame, text='quit', fg='RED',
-                            command=self.master.destroy)
+                            command=self.quit)
         self.quit_button.grid(row=9,column=2)
+           
 
-        self.data_entry_frame.pack(expand=1)
-        #add item
+        self.header.pack(fill="x")
+        self.data_entry_frame.place(relx=.5,rely=.5, anchor=tk.CENTER)
+        self.data_entry_frame_outer.pack(fill="both", expand=1)
+        
     
+    #add item
     def add_item(self):
         self.db_c.add_item(float(self.entries['stocked quantity'].get()),
              float(self.entries['cost'].get()), float(self.entries['price'].get()),
@@ -155,15 +163,14 @@ class DB_App:
         for k,v in self.entries.items():
             print(k, v.get())
 
-    def quit(self):
-        '''
-        if opened as main app 
-            self.master.destroy
-        elif opened as sub app
-            destroy all active pack/grid elements
-            repack/regrid forgotten elements
-        '''
-        return None
+    def quit(self): 
+        if self.is_sub_app:
+            self.app_frame.destroy()
+            self.window.children['!frame'].pack(fill='both', expand=1)
+        else:
+            self.window.destroy()
+    
+
     ''' 
         reports, maybe add construct & view methods
         item quantity sold, type of item sold, profit by item,
@@ -182,8 +189,8 @@ class DB_App:
     '''end reports '''
 
 if __name__=='__main__':
-    #dba = DB_App()
-    db_c = DB_Connector()
-    test = input()
-    print(test)
-    print(db_c.get_item_by_barcode(test))
+    dba = DB_App()
+    #db_c = DB_Connector()
+    #test = input()
+    #print(test)
+    #print(db_c.get_item_by_barcode(test))

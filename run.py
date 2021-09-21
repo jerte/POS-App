@@ -11,6 +11,7 @@ to do
     - sort items so that most sold appear first
     - maybe alphabetical option too
 4) fine tune app appearance
+5) documentation
 '''
 import tkinter as tk
 from calculator import *
@@ -32,6 +33,9 @@ class Application():
     ''' declare variables and create window '''
     def setup(self): 
         self.window = tk.Tk() 
+        self.app_frame = tk.Frame(self.window)
+        self.app_frame.pack(fill="both", expand=1)
+
         self.db_c = DB_Connector()
         
         self.keyboard_logger = KeyboardLogger(interval=1,report_method='app') 
@@ -70,17 +74,19 @@ class Application():
             
             self.keyboard_logger.log = ''
 
-        # call readScanner again after .5 seconds
+        # call readScanner again after .5 seconds (not set on this time)
         self.window.after(500,self.readScanner)
     
     def create_widgets(self):
-        self.order_book = Orderbook(self.window)
+        self.order_book = Orderbook(self.app_frame)
+           
+        #self.order_book.grid(row=0, column=0)
         self.order_book.pack(fill="both", side='left', expand=1)
-       
         # app controls
         # calculator
         # item selection
-        self.controlFrame = Controls(self.window)
+        
+        self.controlFrame = Controls(self.app_frame, self.window)
         self.controlFrame.pack(fill='both', side='right')
            
         self.controlFrame.calc_controls.link_get_current_order(self.order_book.get_current_order)
