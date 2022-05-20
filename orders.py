@@ -107,12 +107,13 @@ class Orders(tk.Frame):
         self.current = len(self.orders)-1
         self.display_order(self.current)
     
-    def close_order(self):
-        #keep data
+    def close_order(self, paid=False):
+        #if(paid):
+			#keep data	
+        	# send order to db
         self.orders.pop(self.current)
         self.current = 0
         self.create_display()
-        # send order to db
     
     def display_order(self, index=0):
         self.current = index 
